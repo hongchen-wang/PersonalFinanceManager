@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "CrfqG6tT//jlvwTFNEXIiaBkAv4VFBT9i8ScxbkcSS8=",
+  "Source": "PersonalFinanceManager.Server",
+  "BasePath": "_content/PersonalFinanceManager.Server",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

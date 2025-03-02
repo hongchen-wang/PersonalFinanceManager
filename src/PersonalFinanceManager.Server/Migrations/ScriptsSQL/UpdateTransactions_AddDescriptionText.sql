@@ -1,0 +1,1 @@
+﻿ALTER TABLE "Transactions" ADD COLUMN IF NOT EXISTS "Description" TEXT;

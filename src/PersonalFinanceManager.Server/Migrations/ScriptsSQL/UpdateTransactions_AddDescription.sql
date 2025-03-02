@@ -1,0 +1,1 @@
+﻿ALTER TABLE "Transactions" ADD Description VARCHAR(255) NULL;
