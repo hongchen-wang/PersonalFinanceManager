@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PersonalFinanceManager.Server.Data;
+using PersonalFinanceManager.Server.Repositories;
 using PersonalFinanceManager.Server.Services;
 using System.Text;
 
@@ -36,18 +37,19 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<JwtService>();
-
 // Configure Entity Framework Core with PostgreSQL
 builder.Services.AddDbContext<FinanceManagerDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register FLuentMigrator
+// Register dependencies
+builder.Services.AddSingleton<JwtService>();
+builder.Services.AddScoped<UserRepository>();
+
+// Register FluentMigrator
 builder.Services.AddFluentMigratorCore()
     .ConfigureRunner(rb => rb
         .AddPostgres()
         .WithGlobalConnectionString(builder.Configuration.GetConnectionString("DefaultConnection"))
         .ScanIn(typeof(Program).Assembly).For.Migrations());
-
 
 
 var app = builder.Build();

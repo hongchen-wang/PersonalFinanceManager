@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceManager.Server.Models;
+using PersonalFinanceManager.Server.Repositories;
 using PersonalFinanceManager.Server.Services;
 
 namespace PersonalFinanceManager.Server.Controllers
@@ -9,56 +12,53 @@ namespace PersonalFinanceManager.Server.Controllers
     public class AuthController : ControllerBase
     {
         private readonly JwtService _jwtService;
-        public AuthController(JwtService jwtService)
+        private readonly UserRepository _userRepository;
+        private readonly PasswordHasher<User> _passwordHasher = new();
+
+        public AuthController(UserRepository userRepository,
+            JwtService jwtService)
         {
+            _userRepository = userRepository;
             _jwtService = jwtService;
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] User user)
+        {
+            if (_userRepository.GetUserByUsername(user.Username) != null)
+            {
+                return BadRequest("User already exists");
+            }
+
+            user.PasswordHash = HashPassword(user.PasswordHash);
+            await _userRepository.AddUser(user);
+            return Ok("User registered successfully");
         }
 
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            // TODO: replace Email by Username (call from user service ?)
-            if (request.Username == "admin" && request.Password == "password")
+            var dbUser = _userRepository.GetUserByUsername(request.Username);
+            
+            if (dbUser == null || !VerifyPassword(dbUser.PasswordHash, request.Password))
             {
-                var token = _jwtService.GenerateSecurityToken(request.Username);
-                return Ok(new { Token = token });
+                return Unauthorized("Invalid credentials");
             }
-            return Unauthorized("Invalid credentials");
+
+            var token = _jwtService.GenerateSecurityToken(request.Username);
+            return Ok(new { Token = token });
         }
 
-        //private readonly IUserService _userService;
-        //private readonly JwtService _jwtService;
-        //public AuthController(IUserService userService, JwtService jwtService)
-        //{
-        //    _userService = userService;
-        //    _jwtService = jwtService;
-        //}
-        //[HttpPost("login")]
-        //public async Task<IActionResult> Login([FromBody] LoginRequest request)
-        //{
-        //    var user = await _userService.GetUserByUsername(request.Username);
-        //    if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
-        //    {
-        //        return Unauthorized();
-        //    }
-        //    var token = _jwtService.GenerateSecurityToken(user.Username);
-        //    return Ok(new { Token = token });
-        //}
-        //[HttpPost("register")]
-        //public async Task<IActionResult> Register([FromBody] RegisterRequest request)
-        //{
-        //    var user = await _userService.GetUserByUsername(request.Username);
-        //    if (user != null)
-        //    {
-        //        return BadRequest("User already exists");
-        //    }
-        //    var newUser = new User
-        //    {
-        //        Username = request.Username,
-        //        Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
-        //    };
-        //    await _userService.AddUser(newUser);
-        //    return Ok();
-        //}
+        private string HashPassword(string password)
+        {
+
+            return _passwordHasher.HashPassword(null, password);
+        }
+
+        private bool VerifyPassword(string hashedPassword, string inputPassword)
+        {
+            return _passwordHasher.VerifyHashedPassword(null, hashedPassword, inputPassword) == PasswordVerificationResult.Success;
+        }
+
     }
 }
