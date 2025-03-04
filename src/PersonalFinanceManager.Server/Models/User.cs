@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PersonalFinanceManager.Server.Assets;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PersonalFinanceManager.Server.Models
@@ -18,5 +19,9 @@ namespace PersonalFinanceManager.Server.Models
         [Required]
         // hashed password
         public string PasswordHash { get; set; }
+
+        [Required]
+        public string Role { get; set; } = Ressources.UserRole.User;
+
     }
 }

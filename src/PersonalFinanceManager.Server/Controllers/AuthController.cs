@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using PersonalFinanceManager.Server.Assets;
 using PersonalFinanceManager.Server.Models;
 using PersonalFinanceManager.Server.Repositories;
 using PersonalFinanceManager.Server.Services;
@@ -27,7 +28,7 @@ namespace PersonalFinanceManager.Server.Controllers
         {
             if (_userRepository.GetUserByUsername(user.Username) != null)
             {
-                return BadRequest("User already exists");
+                return BadRequest(Ressources.BusinessException.UserAlreadyExists);
             }
 
             user.PasswordHash = HashPassword(user.PasswordHash);
@@ -42,10 +43,10 @@ namespace PersonalFinanceManager.Server.Controllers
             
             if (dbUser == null || !VerifyPassword(dbUser.PasswordHash, request.Password))
             {
-                return Unauthorized("Invalid credentials");
+                return Unauthorized(Ressources.BusinessException.InvalidCredentials);
             }
 
-            var token = _jwtService.GenerateSecurityToken(request.Username);
+            var token = _jwtService.GenerateSecurityToken(dbUser);
             return Ok(new { Token = token });
         }
 

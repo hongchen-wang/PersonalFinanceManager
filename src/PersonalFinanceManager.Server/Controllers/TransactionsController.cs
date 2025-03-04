@@ -5,13 +5,20 @@ namespace PersonalFinanceManager.Server.Controllers
 {
     [Route("api/transactions")]
     [ApiController]
-    [Authorize]
     public class TransactionsController : ControllerBase
     {
         [HttpGet]
-        public IActionResult GetTransactions()
+        [Authorize(Roles = "Admin")]
+        public IActionResult GetAllTransactions()
         {
-            return Ok(new {Message = "This is a protected endpoint"});
+            return Ok(new {Message = "Only accessed by Admin"});
+        }
+
+        [HttpGet("{id}")]
+        [Authorize]
+        public IActionResult GetTransactionById(int id)
+        {
+            return Ok(new { Message = "Transaction {id}" });
         }
 
 
