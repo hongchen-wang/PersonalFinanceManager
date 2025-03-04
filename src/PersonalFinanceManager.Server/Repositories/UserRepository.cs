@@ -30,5 +30,20 @@ namespace PersonalFinanceManager.Server.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task UpdateUser(User user)
+        {
+            if (GetUserByUsername(user.Username) != null
+                || GetUserByEmail(user.Email) != null)
+            {
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public User? GetUserByRefreshToken(string refreshToken)
+        {
+            return _context.Users.FirstOrDefault(u => u.RefreshToken == refreshToken);
+        }
     }
 }

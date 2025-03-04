@@ -23,5 +23,10 @@ namespace PersonalFinanceManager.Server.Models
         [Required]
         public string Role { get; set; } = Ressources.UserRole.User;
 
+        //store refresh token
+        public string? RefreshToken { get; set; }
+
+        // expiry date of the refresh token
+        public DateTime? RefreshTokenExpiration { get; set; }
     }
 }

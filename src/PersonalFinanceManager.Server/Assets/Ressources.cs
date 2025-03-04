@@ -12,7 +12,9 @@
         {
             public const string UserAlreadyExists = "User already exists";
             public const string InvalidCredentials = "Invalid credentials";
+            public const string InvalidRefreshToken = "Invalid refresh token";
             public const string JwtKeyMissing = "JWT key is missing";
+            public const string RefreshTokenExpired = "Invalid or expired refresh token.";
         }
     }
 }

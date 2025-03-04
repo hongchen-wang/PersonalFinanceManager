@@ -2,12 +2,12 @@
 
 namespace PersonalFinanceManager.Server.Migrations.FluentMigrator
 {
-    [Migration(20250304_01)]
-    public class UpdateUsers_AddRole : Migration
+    [Migration(20250304_02)]
+    public class UpdateUsers_AddRefreshToken : Migration
     {
         public override void Up()
         {
-            var sql = File.ReadAllText("Migrations/ScriptsSQL/UpdateUsers_AddRole.sql");
+            var sql = File.ReadAllText("Migrations/ScriptsSQL/UpdateUsers_AddRefreshToken.sql");
             Execute.Sql(sql);
         }
 
