@@ -55,7 +55,19 @@ namespace PersonalFinanceManager.Server.Controllers
             dbUser.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
             await _userRepository.UpdateUser(dbUser);
 
-            return Ok(new { Token = token, RefreshToken = refreshToken });
+            // Set the refresh token in HttpOnly cookie
+            Response.Cookies.Append(
+                "refreshToken",
+                refreshToken, 
+                new CookieOptions 
+                {
+                    HttpOnly = true, // prevent JavaScript from accessing the cookie
+                    Secure = true, // cookie will only be sent over HTTPS
+                    SameSite = SameSiteMode.Strict, // cookie will not be sent on cross-site request forgery (prevent CSRF attacks)
+                    Expires = DateTime.UtcNow.AddDays(7) // cookie will expire in 7 days
+                });
+
+            return Ok(new { Token = token });
         }
 
         private string HashPassword(string password)
@@ -72,6 +84,12 @@ namespace PersonalFinanceManager.Server.Controllers
         [HttpPost("refresh")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
+            // recover the refresh token from the cookie
+            if (!Request.Cookies.TryGetValue("refreshToke", out var refreshToken))
+            { 
+                return Unauthorized(Ressources.BusinessException.NoRefreshTokenFound);
+            }
+
             var dbUser = _userRepository.GetUserByRefreshToken(request.RefreshToken);
             if (dbUser == null)
             {
@@ -84,15 +102,49 @@ namespace PersonalFinanceManager.Server.Controllers
             }
 
             // generate a new access token
-            var token = _jwtService.GenerateSecurityToken(dbUser);
+            var accessToken = _jwtService.GenerateSecurityToken(dbUser);
 
             // generate refresh token
-            var refreshToken = TokenHelper.GenerateRefreshToken();
-            dbUser.RefreshToken = refreshToken;
+            var newRefreshToken = TokenHelper.GenerateRefreshToken();
+            dbUser.RefreshToken = newRefreshToken;
             dbUser.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
             await _userRepository.UpdateUser(dbUser);
 
-            return Ok(new { Token = token, RefreshToken = refreshToken });
+            // Set the refresh token in HttpOnly cookie
+            Response.Cookies.Append(
+                "refreshToken",
+                newRefreshToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(7)
+                });
+
+            return Ok(new { Token = accessToken });
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+            {
+                return Ok(Ressources.BusinessException.NoRefreshTokenFound);
+            }
+
+            var dbUser = _userRepository.GetUserByRefreshToken(refreshToken);
+            if (dbUser != null)
+            {
+                // remove the refresh token from db
+                dbUser.RefreshToken = null;
+                dbUser.RefreshTokenExpiration = null;
+                await _userRepository.UpdateUser(dbUser);
+            }
+
+            // remove the refresh token from the cookie
+            Response.Cookies.Delete("refreshToken");
+            return Ok(new { Message = "Logged out successfully" });
         }
 
     }

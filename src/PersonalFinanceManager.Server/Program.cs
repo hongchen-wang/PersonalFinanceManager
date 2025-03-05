@@ -9,6 +9,17 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Enable CORS to allow credentials
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        builder => builder
+                .WithOrigins("http://localhost:4200") // frontend URL
+                .AllowCredentials()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+});
+
 // Add services to the container.
 
 // configure JWT settings
@@ -69,6 +80,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Use CORS policy
+app.UseCors("AllowFrontend");
 
 // Enable authentication and authorization in the request pipeline
 app.UseAuthentication();

@@ -13,6 +13,7 @@
             public const string UserAlreadyExists = "User already exists";
             public const string InvalidCredentials = "Invalid credentials";
             public const string InvalidRefreshToken = "Invalid refresh token";
+            public const string NoRefreshTokenFound = "No refresh token found";
             public const string JwtKeyMissing = "JWT key is missing";
             public const string RefreshTokenExpired = "Invalid or expired refresh token.";
         }
