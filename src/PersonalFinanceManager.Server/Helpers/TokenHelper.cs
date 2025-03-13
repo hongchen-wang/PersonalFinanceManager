@@ -4,7 +4,7 @@ namespace PersonalFinanceManager.Server.Helpers
 {
     public class TokenHelper
     {
-        public static string GenerateRefreshToken()
+        public static string GenerateToken()
         {
             var randomNumber = new byte[32];
             using var rng = RandomNumberGenerator.Create();

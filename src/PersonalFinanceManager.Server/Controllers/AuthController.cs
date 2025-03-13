@@ -1,11 +1,11 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceManager.Server.Assets;
 using PersonalFinanceManager.Server.Helpers;
 using PersonalFinanceManager.Server.Models;
 using PersonalFinanceManager.Server.Repositories;
 using PersonalFinanceManager.Server.Services;
+using LoginRequest = PersonalFinanceManager.Server.Models.LoginRequest;
 
 namespace PersonalFinanceManager.Server.Controllers
 {
@@ -50,7 +50,7 @@ namespace PersonalFinanceManager.Server.Controllers
             var token = _jwtService.GenerateSecurityToken(dbUser);
 
             // generate refresh token
-            var refreshToken = TokenHelper.GenerateRefreshToken();
+            var refreshToken = TokenHelper.GenerateToken();
             dbUser.RefreshToken = refreshToken;
             dbUser.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
             await _userRepository.UpdateUser(dbUser);
@@ -72,7 +72,6 @@ namespace PersonalFinanceManager.Server.Controllers
 
         private string HashPassword(string password)
         {
-
             return _passwordHasher.HashPassword(null, password);
         }
 
@@ -105,7 +104,7 @@ namespace PersonalFinanceManager.Server.Controllers
             var accessToken = _jwtService.GenerateSecurityToken(dbUser);
 
             // generate refresh token
-            var newRefreshToken = TokenHelper.GenerateRefreshToken();
+            var newRefreshToken = TokenHelper.GenerateToken();
             dbUser.RefreshToken = newRefreshToken;
             dbUser.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
             await _userRepository.UpdateUser(dbUser);
@@ -145,6 +144,46 @@ namespace PersonalFinanceManager.Server.Controllers
             // remove the refresh token from the cookie
             Response.Cookies.Delete("refreshToken");
             return Ok(new { Message = "Logged out successfully" });
+        }
+
+        // reset password 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] PasswordResetRequest request)
+        { 
+            var dbUser = _userRepository.GetUserByEmail(request.Email);
+            if (dbUser == null)
+            { 
+                return BadRequest(Ressources.BusinessException.UserNotFound);
+            }
+
+            // generate reset token
+            dbUser.ResetToken = TokenHelper.GenerateToken();
+            dbUser.ResetTokenExpiration = DateTimeOffset.UtcNow.AddHours(1); // reset token valid for 1h
+            await _userRepository.UpdateUser(dbUser);
+
+            // TODO: Send email with reset link (e.g., "https://frontend.com/reset?token={user.ResetToken}")
+
+            return Ok(new { Message = Ressources.ResultMessage.ResetLinkSent });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPassword request)
+        { 
+            var dbUser = _userRepository.GetUserByResetToken(request.Token);
+            if (dbUser == null || dbUser.ResetTokenExpiration < DateTime.UtcNow)
+            {
+                return BadRequest(Ressources.BusinessException.ResetTokenExpired);
+            }
+
+            // hash new password for storage
+            dbUser.PasswordHash = HashPassword(request.NewPassword);
+
+            // clear reset token
+            dbUser.ResetToken = null;
+            dbUser.ResetTokenExpiration = null;
+            await _userRepository.UpdateUser(dbUser);
+
+            return Ok(new { Message = Ressources.ResultMessage.PasswordReset });
         }
 
     }

@@ -10,12 +10,20 @@
 
         public static class BusinessException
         {
-            public const string UserAlreadyExists = "User already exists";
-            public const string InvalidCredentials = "Invalid credentials";
-            public const string InvalidRefreshToken = "Invalid refresh token";
-            public const string NoRefreshTokenFound = "No refresh token found";
-            public const string JwtKeyMissing = "JWT key is missing";
+            public const string UserAlreadyExists = "User already exists.";
+            public const string InvalidCredentials = "Invalid credentials.";
+            public const string InvalidRefreshToken = "Invalid refresh token.";
+            public const string NoRefreshTokenFound = "No refresh token found.";
+            public const string JwtKeyMissing = "JWT key is missing.";
             public const string RefreshTokenExpired = "Invalid or expired refresh token.";
+            public const string UserNotFound = "User not found.";   
+            public const string ResetTokenExpired = "Invalid or expired reset token.";
+        }
+
+        public static class ResultMessage
+        {
+            public const string ResetLinkSent = "Reset link sent to your email";
+            public const string PasswordReset = "Password reset successfully.";
         }
     }
 }

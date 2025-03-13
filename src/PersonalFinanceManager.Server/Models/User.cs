@@ -28,5 +28,9 @@ namespace PersonalFinanceManager.Server.Models
 
         // expiry date of the refresh token
         public DateTime? RefreshTokenExpiration { get; set; }
+
+        // password reset properties
+        public string? ResetToken { get; set; }
+        public DateTimeOffset? ResetTokenExpiration { get; set; }
     }
 }

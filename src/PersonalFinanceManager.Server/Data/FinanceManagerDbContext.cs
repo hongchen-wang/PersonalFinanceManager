@@ -7,6 +7,8 @@ namespace PersonalFinanceManager.Server.Data
     {
         public FinanceManagerDbContext(DbContextOptions options) : base(options)
         {
+            // solution: https://stackoverflow.com/questions/69961449/net6-and-datetime-problem-cannot-write-datetime-with-kind-utc-to-postgresql-ty
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
 
         public DbSet<Transaction> Transactions { get; set; }

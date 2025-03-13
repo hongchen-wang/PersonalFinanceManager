@@ -1,9 +1,10 @@
 ﻿using PersonalFinanceManager.Server.Data;
+using PersonalFinanceManager.Server.Interface;
 using PersonalFinanceManager.Server.Models;
 
 namespace PersonalFinanceManager.Server.Repositories
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly FinanceManagerDbContext _context;
         public UserRepository(FinanceManagerDbContext context)
@@ -44,6 +45,11 @@ namespace PersonalFinanceManager.Server.Repositories
         public User? GetUserByRefreshToken(string refreshToken)
         {
             return _context.Users.FirstOrDefault(u => u.RefreshToken == refreshToken);
+        }
+
+        public User? GetUserByResetToken(string resetToken)
+        {
+            return _context.Users.FirstOrDefault(u => u.ResetToken == resetToken);
         }
     }
 }
