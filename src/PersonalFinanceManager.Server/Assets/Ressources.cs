@@ -22,7 +22,8 @@
 
         public static class ResultMessage
         {
-            public const string ResetLinkSent = "Reset link sent to your email";
+            public const string LogoutSuccess = "Logged out successfully.";
+            public const string ResetLinkSent = "Reset link sent to your Email.";
             public const string PasswordReset = "Password reset successfully.";
         }
     }

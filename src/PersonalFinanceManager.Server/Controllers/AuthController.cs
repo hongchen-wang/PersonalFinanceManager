@@ -143,7 +143,7 @@ namespace PersonalFinanceManager.Server.Controllers
 
             // remove the refresh token from the cookie
             Response.Cookies.Delete("refreshToken");
-            return Ok(new { Message = "Logged out successfully" });
+            return Ok(new { Message = Ressources.ResultMessage.LogoutSuccess });
         }
 
         // reset password 
