@@ -55,6 +55,7 @@ builder.Services.AddDbContext<FinanceManagerDbContext>(options => options.UseNpg
 builder.Services.AddSingleton<JwtService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 // Register FluentMigrator
 builder.Services.AddFluentMigratorCore()
