@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Transaction } from 'src/app/models/transaction.model';
 import { TransactionService } from 'src/app/services/transaction.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-transaction-form',
@@ -12,17 +13,20 @@ import { TransactionService } from 'src/app/services/transaction.service';
 export class TransactionFormComponent implements OnInit {
   transactionForm!: FormGroup;
   transactionId?: number;
+  successMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
     private transactionService: TransactionService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
     this.transactionForm = this.fb.group({
-      description: ['', Validators.required],
+      name: ['', Validators.required], // single-validator case: FIELD_KEY: [INITIAL_VALUE, VALIDATOR]
+      description: [''],
       amount: [0, [Validators.required, Validators.min(0.01)]], // multi-validator case: FIELD_KEY: [INITIAL_VALUE, [LIST_OF_VALIDATORS]]
       date: ['', Validators.required],
       categoryId: [null, Validators.required],
@@ -48,11 +52,21 @@ export class TransactionFormComponent implements OnInit {
       //update existing transaction
       this.transactionService.updateTransaction(transaction).subscribe(() => {
         this.router.navigate(['/transactions']);
+        // this.snackBar.open('Transaction added successfully!', 'Close', {
+        //   duration: 3000,
+        // });
+        this.successMessage = 'Transaction updated successfully!';
+        this.transactionForm.reset();
       });
     } else {
       // add new transaction
       this.transactionService.addTransaction(transaction).subscribe(() => {
         this.router.navigate(['/transactions']);
+        // this.snackBar.open('Transaction added successfully!', 'Close', {
+        //   duration: 3000,
+        // });
+        this.successMessage = 'Transaction updated successfully!';
+        this.transactionForm.reset();
       });
     }
   }

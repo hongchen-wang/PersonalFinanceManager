@@ -1,11 +1,17 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { TransactionFormComponent } from './components/transaction-form/transaction-form.component';
+import { AuthGuard } from './guards/auth.guard';
+import { LoginComponent } from './pages/login/login.component';
 
 const routes: Routes = [
-  { path: 'transactions/add', component: TransactionFormComponent },
-  { path: 'transactions/edit/:id', component: TransactionFormComponent },
-  { path: '**', redirectTo: 'transactions/add' }, // default route
+  { path: 'login', component: LoginComponent },
+  {
+    path: 'transactions',
+    component: TransactionFormComponent,
+    canActivate: [AuthGuard],
+  },
+  { path: '**', redirectTo: 'login' }, // default route
 ];
 
 @NgModule({
