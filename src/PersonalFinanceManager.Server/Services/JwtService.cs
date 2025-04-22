@@ -1,4 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using PersonalFinanceManager.Server.Assets;
+using PersonalFinanceManager.Server.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -13,19 +15,20 @@ namespace PersonalFinanceManager.Server.Services
 
         public JwtService(IConfiguration configuration)
         {
-            _key = configuration["Jwt:SecretKey"] ?? throw new ArgumentNullException("JWT key is missing");
+            _key = configuration["Jwt:SecretKey"] ?? throw new ArgumentNullException(Ressources.BusinessException.JwtKeyMissing);
             _issuer = configuration["Jwt:Issuer"];
             _audience = configuration["Jwt:Audience"];
         }
 
-        public string GenerateSecurityToken(string username)
+        public string GenerateSecurityToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
             var subject = new ClaimsIdentity(new[] 
             { 
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, "User")
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
             });
 
             var tokenDescriptor = new SecurityTokenDescriptor

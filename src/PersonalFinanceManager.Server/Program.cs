@@ -3,10 +3,22 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PersonalFinanceManager.Server.Data;
+using PersonalFinanceManager.Server.Repositories;
 using PersonalFinanceManager.Server.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Enable CORS to allow credentials
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        builder => builder
+                .WithOrigins("http://localhost:4200") // frontend URL
+                .AllowCredentials()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+});
 
 // Add services to the container.
 
@@ -36,18 +48,21 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<JwtService>();
-
 // Configure Entity Framework Core with PostgreSQL
 builder.Services.AddDbContext<FinanceManagerDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register FLuentMigrator
+// Register dependencies
+builder.Services.AddSingleton<JwtService>();
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+
+// Register FluentMigrator
 builder.Services.AddFluentMigratorCore()
     .ConfigureRunner(rb => rb
         .AddPostgres()
         .WithGlobalConnectionString(builder.Configuration.GetConnectionString("DefaultConnection"))
         .ScanIn(typeof(Program).Assembly).For.Migrations());
-
 
 
 var app = builder.Build();
@@ -67,6 +82,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Use CORS policy
+app.UseCors("AllowFrontend");
 
 // Enable authentication and authorization in the request pipeline
 app.UseAuthentication();

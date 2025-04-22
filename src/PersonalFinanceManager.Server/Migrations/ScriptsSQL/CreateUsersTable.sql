@@ -1,0 +1,7 @@
+﻿CREATE TABLE IF NOT EXISTS "Users" 
+(
+	"Id" SERIAL NOT NULL PRIMARY KEY,
+	"Username" TEXT NOT NULL,
+	"Email" TEXT NOT NULL,
+	"PasswordHash" TEXT NOT NULL
+);
